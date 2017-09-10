@@ -1,0 +1,24 @@
+FROM phusion/baseimage:latest
+
+MAINTAINER Jorg Bolay <jorg@bolay.org>
+
+EXPOSE 53
+EXPOSE 53/udp 
+EXPOSE 88 
+EXPOSE 88/udp 
+EXPOSE 135 
+EXPOSE 137-138/udp 
+EXPOSE 139 
+EXPOSE 389
+EXPOSE 389/udp
+EXPOSE 445
+EXPOSE 464
+EXPOSE 464/udp
+EXPOSE 636
+EXPOSE 1024-1044
+EXPOSE 3268-3269
+
+
+COPY context/ /
+
+CMD ["/sbin/my_init"]

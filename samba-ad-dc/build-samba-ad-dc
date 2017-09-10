@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# in these file we want to start the docker container of the dhcp server
+
+docker build -t jbolay/pdc .

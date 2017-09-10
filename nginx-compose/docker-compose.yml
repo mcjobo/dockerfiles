@@ -1,0 +1,13 @@
+version: '2'
+services:
+    web:
+      image: nginx
+      volumes:
+       - ./context/jorg-laptop.template:/etc/nginx/conf.d/jorg-laptop.template
+       - ./context/html:/usr/share/nginx/html:ro
+      ports:
+       - "8080:80"
+      environment:
+       - NGINX_HOST=jorg-laptop.local.bolay.org
+       - NGINX_PORT=80
+      #command: /bin/bash -c "envsubst < /etc/nginx/conf.d/mysite.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
