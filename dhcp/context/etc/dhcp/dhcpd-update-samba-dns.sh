@@ -1,7 +1,7 @@
 #!/bin/bash
 # Begin dhcpd-update-dns.sh
 
-. /etc/dhcpd/dhcpd-update-samba-dns.conf || exit 1
+. /etc/dhcp/dhcpd-update-samba-dns.conf || exit 1
 
 ACTION=$1
 IP=$2

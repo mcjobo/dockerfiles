@@ -1,0 +1,100 @@
+version: '2'
+services:
+  proxy:
+    image: jwilder/nginx-proxy
+    cpu_shares: 256
+    mem_limit: 256000000
+    container_name: proxy
+    labels:
+      io.rancher.sidekicks: app, db, letsencrypt-companion
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /mnt/config/nextcloud/proxy/conf.d:/etc/nginx/conf.d
+      - /mnt/config/nextcloud/proxy/vhost.d:/etc/nginx/vhost.d
+      - /mnt/config/nextcloud/proxy/html:/usr/share/nginx/html
+      - /mnt/config/nextcloud/proxy/certs:/etc/nginx/certs:ro
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - proxy-tier
+    #restart: always
+
+  letsencrypt-companion:
+    image: alastaircoote/docker-letsencrypt-nginx-proxy-companion
+    cpu_shares: 50
+    mem_limit: 50000000
+    container_name: letsencrypt-companion
+    volumes_from:
+      - proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /mnt/config/nextcloud/proxy/certs:/etc/nginx/certs:rw
+    #restart: always
+
+
+  app:
+    image: nextcloud
+    cpu_shares: 256
+    mem_limit: 256000000
+    container_name: nextcloud
+    links:
+      - db
+    ports:
+      - 9080:80
+    volumes:
+      - /mnt/config/nextcloud/nextcloud/apps:/var/www/html/apps
+      - /mnt/config/nextcloud/nextcloud/config:/var/www/html/config
+      - /mnt/config/nextcloud/nextcloud/data:/var/www/html/data
+    environment:
+      - VIRTUAL_HOST=mcjobo.bolay.org
+      - VIRTUAL_NETWORK=nginx-proxy
+      - VIRTUAL_PORT=9080
+      - LETSENCRYPT_HOST=mcjobo.bolay.org
+      - LETSENCRYPT_EMAIL=jorg@bolay.org
+    networks:
+     - proxy-tier
+#    restart: always
+
+  db:
+    image: mariadb
+    cpu_shares: 256
+    mem_limit: 256000000
+    container_name: db
+    volumes:
+      - /mnt/config/nextcloud/db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=jb80049JB
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=jb80049JB
+    networks:
+      - proxy-tier
+    #restart: always
+
+    #redis:
+    #image: redis
+    #cpu_shares: 100
+    #mem_limit: 256000000
+    #container_name: redis
+    #networks:
+    #  - proxy-tier
+    #restart: always
+
+  #collabora:
+  #image: collabora/code
+  #cpu_shares: 100
+  #mem_limit: 256000000
+  #container_name: collabora
+  #cap_add:
+  #   - MKNOD
+  #environment:
+  #   - domain=${DOMAIN}
+  #networks:
+  #  - proxy-tier
+  #restart: always
+
+networks:
+  proxy-tier:
+    external:
+      name: nginx-proxy
